@@ -1,0 +1,88 @@
+{% extends 'base.html' %}{% block title %}{{course.title}}{% endblock %}
+{% block content %}
+<div class="container py-5">
+  <div class="course-detail mt-5">
+    <img src="{{course.image}}" alt="{{course.title}}">
+    <div class="p-4 p-lg-5">
+      <span class="badge-soft">{{course.subject}}</span>
+      <h1 class="mt-2">{{course.title}}</h1>
+      <p class="lead">{{course.description}}</p>
+      <div class="row g-3 my-3">
+        <div class="col-6 col-md-3"><b>Duration</b><br>{{course.duration}}</div>
+        <div class="col-6 col-md-3"><b>Mode</b><br>{{course.mode}}</div>
+        <div class="col-6 col-md-3"><b>Fee</b><br>{{course.paid}}</div>
+        <div class="col-6 col-md-3"><b>Trainer</b><br>{{course.trainer}}</div>
+      </div>
+
+      {% if not enrollment %}
+      <div class="alert alert-primary border-0 rounded-4">Enroll to unlock the lecture player, progress tracking and final assessment.</div>
+      <form method="post" action="{{url_for('enroll',cid=course.id)}}"><button class="btn btn-primary btn-lg px-4">Enroll Now <i class="bi bi-arrow-right"></i></button></form>
+      {% else %}
+      <div class="p-3 rounded-4 bg-light mb-4">
+        <div class="d-flex justify-content-between mb-2"><b>Course Progress</b><strong id="courseProgressText">{{course_progress}}%</strong></div>
+        <div class="progress" style="height:12px"><div id="courseProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width:{{course_progress}}%"></div></div>
+        <small class="text-secondary">Complete every lecture to unlock the final assessment.</small>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-lg-8">
+          <div class="video-shell">
+            <div class="ratio ratio-16x9">
+              <video id="lessonVideo" controls class="rounded-4 w-100" preload="metadata">
+                <source id="lessonSource" src="{{ lessons[0].video_url if lessons else '' }}" type="video/mp4">
+                Your browser does not support HTML video.
+              </video>
+            </div>
+          </div>
+          <div class="cardx mt-3">
+            <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+              <div><span class="eyebrow dark">CURRENT LECTURE</span><h4 id="lessonTitle">{{lessons[0].title if lessons else 'No lecture'}}</h4></div>
+              <span id="lessonType" class="badge bg-danger-subtle text-danger">{{lessons[0].lesson_type if lessons else 'Recorded Lecture'}}</span>
+            </div>
+            <p class="muted mb-0">Watch the lecture and let the video finish to mark it complete.</p>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="cardx h-100">
+            <h4>Course Lectures</h4>
+            <div class="lesson-list">
+              {% for l in lessons %}
+              <button type="button" class="lesson-item {% if loop.first %}active{% endif %}" data-url="{{l.video_url}}" data-title="{{l.title}}" data-type="{{l.lesson_type}}" data-id="{{l.id}}" data-complete="{{1 if l.id in done else 0}}">
+                <span class="lesson-number">{{'%02d'%loop.index}}</span>
+                <span class="flex-grow-1 text-start"><b>{{l.title}}</b><small>{{l.duration}} • {{l.lesson_type}}</small></span>
+                <span class="lesson-check">{% if l.id in done %}✓{% else %}○{% endif %}</span>
+              </button>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 flex-wrap mt-4">
+        <form method="post" action="{{url_for('learn',cid=course.id)}}"><button class="btn btn-outline-primary">Mark Next Lesson Complete</button></form>
+        {% if course_progress >= 100 %}<a class="btn btn-primary" href="{{url_for('final_test',cid=course.id)}}">Final Assessment <i class="bi bi-clipboard-check"></i></a>{% else %}<button class="btn btn-secondary" disabled>Final Assessment Locked</button>{% endif %}
+        {% if enrollment.certificate_code %}<a class="btn btn-success" href="{{url_for('certificate',cid=course.id)}}">View Certificate 🏆</a>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+(function(){
+ const video=document.getElementById('lessonVideo'); if(!video) return;
+ const source=document.getElementById('lessonSource'), title=document.getElementById('lessonTitle'), type=document.getElementById('lessonType');
+ document.querySelectorAll('.lesson-item').forEach(btn=>btn.addEventListener('click',()=>{
+   document.querySelectorAll('.lesson-item').forEach(x=>x.classList.remove('active')); btn.classList.add('active');
+   source.src=btn.dataset.url; video.load(); title.textContent=btn.dataset.title; type.textContent=btn.dataset.type;
+ }));
+ video.addEventListener('ended', async ()=>{
+   const active=document.querySelector('.lesson-item.active'); if(!active || active.dataset.complete==='1') return;
+   const res=await fetch('/lesson/'+active.dataset.id+'/complete',{method:'POST',headers:{'Content-Type':'application/json'}});
+   const data=await res.json();
+   if(data.ok){ active.dataset.complete='1'; active.querySelector('.lesson-check').textContent='✓'; document.getElementById('courseProgressText').textContent=data.progress+'%'; document.getElementById('courseProgressBar').style.width=data.progress+'%'; if(data.progress>=100){location.reload();} }
+ });
+})();
+</script>
+{% endblock %}

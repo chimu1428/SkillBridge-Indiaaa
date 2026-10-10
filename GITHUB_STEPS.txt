@@ -1,0 +1,56 @@
+MahaSkill — staged GitHub upload guide
+=======================================
+
+IMPORTANT: All application files in the stage folders are copied byte-for-byte from the supplied ZIP. No application code has been edited. The stage folders are only a way to commit the existing files in smaller, ordered steps.
+
+HOW TO USE
+1. Extract this bundle.
+2. Create a GitHub repository named MahaSkill (or your chosen name).
+3. On your computer, create one working project folder.
+4. Copy the CONTENTS of each stage folder into that same project folder, in numeric order (01, 02, ... 10). Merge folders when asked; do not create nested stage folders inside the project.
+5. After each stage, run the commands below from the project folder to commit and push. For the first stage, use `git init` and add the GitHub remote as described below.
+6. The website may not run correctly until every stage has been copied, because the existing Flask app references templates/assets added in later stages.
+7. Once all stages are copied and pushed, deploy the completed repository on Render to get a public website URL.
+
+STAGE ORDER
+01_project_setup — requirements and existing README
+02_core_flask_and_shared_ui — Flask app and shared layout/home/CSS/JS
+03_authentication_and_registration — login and role registration pages
+04_student_module — student dashboard/profile/progress/certificates/applications
+05_college_module — college dashboard, enrollment, feedback and reports
+06_industry_module — industry dashboard, candidates, applications and jobs
+07_government_module — government dashboard/reports/courses/support pages
+08_ngo_and_partner_module — NGO and partner pages
+09_courses_assessments_and_career — courses, quizzes, assessments and career roadmap
+10_remaining_media_assets — existing local demo lecture videos
+
+GIT COMMANDS
+First time only, in your project folder:
+    git init
+    git branch -M main
+    git remote add origin https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
+
+After copying each stage, run:
+    git add .
+    git commit -m "Add stage 01: project setup"
+    git push -u origin main
+
+For later stages, change the commit message to match the stage, e.g.:
+    git commit -m "Add student module"
+    git push
+
+If Git says there is nothing to commit, check that you copied the new stage's files into the project folder and that they are not nested inside the stage folder.
+
+PUBLIC WEBSITE DEPLOYMENT (after all 10 stages)
+- GitHub stores and shares the code; GitHub Pages does not run this Flask/Python application.
+- In Render, create a new Web Service and connect the GitHub repository.
+- Runtime/environment: Python.
+- Build command: `pip install -r requirements.txt`
+- Start command: `gunicorn app:app`
+- The supplied requirements.txt does not include Gunicorn. To deploy with that start command, add `gunicorn` to requirements.txt or use a platform configuration that provides it. Because you requested no code changes, this bundle does not change requirements.txt; ask before making any deployment-related code/config edits.
+- Once deployment succeeds, Render provides a public URL. Share that URL with all teammates; anyone with the link can view the site, subject to the host's availability.
+
+NOTES
+- Do not upload passwords, API keys, or real student data. The original app contains a demo Flask secret key; it has not been changed in this extraction. Before a real public deployment, replace demo secrets and review data/uploads/security settings.
+- Keep large video files in the repository only if your GitHub limits and team workflow allow it. The included videos are copied from your ZIP unchanged.
+- This process creates one GitHub commit per stage, so teammates can see progress over time.

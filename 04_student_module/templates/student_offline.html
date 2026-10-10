@@ -1,0 +1,38 @@
+{% extends 'base.html' %}{% block title %}My Offline Classes{% endblock %}{% block content %}
+<div class="container py-5">
+  <div class="section-head mt-5"><span>OFFLINE LEARNING</span><h2>My Classroom Courses</h2><p>See attendance, published timetable, syllabus and learning progress for every offline course linked by your college.</p></div>
+
+  <div class="row g-4">
+    {% for r in rows %}
+    <div class="col-lg-6"><div class="cardx h-100">
+      <div class="d-flex justify-content-between gap-3"><div><span class="badge-soft">OFFLINE</span><h4 class="mt-2">{{r.title}}</h4><p class="muted mb-1">{{r.batch_name}} • Teacher: {{r.teacher_name or 'Assigned Trainer'}}</p></div><div class="text-end"><b>{{r.attendance or 0}}/{{r.total_lectures or 0}}</b><small class="d-block text-muted">{{r.progress or 0}}% attendance</small></div></div>
+      <div class="progress mt-3" style="height:10px"><div class="progress-bar" style="width:{{r.progress or 0}}%"></div></div>
+      <p class="small text-muted mt-2 mb-0">{{(r.total_lectures or 0)-(r.attendance or 0)}} lectures remaining</p>
+    </div></div>
+    {% else %}<div class="col-12"><div class="cardx text-center"><h4>No offline course linked yet.</h4><p class="muted">Your college can link you to an offline course from Digital Enrollment & Attendance.</p></div></div>{% endfor %}
+  </div>
+
+  <div class="cardx mt-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2"><div><span class="eyebrow dark">SYLLABUS PROGRESS</span><h4>How much syllabus is pending?</h4><p class="muted mb-0">Progress is calculated from the syllabus topics published by your college and the lectures marked present.</p></div></div>
+    <div class="row g-3 mt-1">
+      {% for p in syllabus_progress %}
+      <div class="col-md-6"><div class="border rounded-4 p-3 h-100"><div class="d-flex justify-content-between"><b>{{p.title}}</b><span class="badge bg-primary-subtle text-primary">{{p.percent}}%</span></div><div class="progress mt-2" style="height:8px"><div class="progress-bar" style="width:{{p.percent}}%"></div></div><div class="d-flex justify-content-between mt-2 small text-muted"><span>{{p.completed}} / {{p.total}} topics completed</span><span>{{p.pending}} pending</span></div></div></div>
+      {% else %}<div class="col-12"><div class="alert alert-light border mb-0">Your college has not published a syllabus yet.</div></div>{% endfor %}
+    </div>
+  </div>
+
+  <div class="row g-4 mt-1">
+    <div class="col-lg-7"><div class="cardx"><h4>Published Timetable</h4><p class="muted small mb-3">Your college timetable appears here after it is published.</p>
+      {% for x in schedules %}<div class="border rounded-4 p-3 mb-2"><div class="d-flex justify-content-between flex-wrap"><b>{{x.title}}</b><span>{{x.schedule_date}}</span></div><div class="mt-1">{{x.start_time}}{% if x.end_time %} - {{x.end_time}}{% endif %} • {{x.topic}}</div><small class="text-muted">{{x.teacher_name or 'Teacher not assigned'}} • {{x.batch_name}} • {{x.room or 'Room not assigned'}}</small></div>
+      {% else %}<div class="alert alert-light border mb-0">No upcoming timetable has been published.</div>{% endfor %}
+    </div></div>
+    <div class="col-lg-5"><div class="cardx"><h4>Course Syllabus</h4>
+      {% for x in syllabus %}<div class="py-2 border-bottom"><b>Lecture {{x.lecture_no}} — {{x.topic}}</b><small class="d-block text-muted">{{x.title}}{% if x.description %} • {{x.description}}{% endif %}{% if x.lecture_no in [] %}{% endif %}</small></div>
+      {% else %}<p class="muted mb-0">Syllabus will appear when your college publishes it.</p>{% endfor %}
+    </div></div>
+  </div>
+
+  <div class="cardx mt-4"><h4>Daily Attendance History</h4><div class="table-responsive"><table class="table align-middle"><thead><tr><th>Date</th><th>Course</th><th>Lecture</th><th>Topic</th><th>Status</th></tr></thead><tbody>
+    {% for a in attendance %}<tr><td>{{a.attendance_date}}</td><td>{{a.title}}</td><td>{{a.lecture_no}}</td><td>{{a.topic}}</td><td>{% if a.present %}<span class="badge bg-success">Present</span>{% else %}<span class="badge bg-danger">Absent</span>{% endif %}</td></tr>{% else %}<tr><td colspan="5" class="muted">No attendance entries yet.</td></tr>{% endfor %}
+  </tbody></table></div></div>
+</div>{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html' %}{% block title %}Candidate Matching | MahaSkill{% endblock %}{% block content %}
+<div class="container py-5">
+  <div class="section-head mt-5">
+    <span>INDUSTRY TALENT CENTER</span><h2>Skill-based Candidate Matching</h2>
+    <p>Find students whose domain, career goal, skills and assessment results match your industry requirements.</p>
+  </div>
+  <div class="cardx mb-4 candidate-info-bar"><div><b>{{ candidates|length }}</b><span> candidates available</span></div><a class="btn btn-primary" href="{{ url_for('industry_dashboard') }}"><i class="bi bi-arrow-left me-1"></i>Dashboard</a></div>
+  <div class="row g-4">
+  {% for c in candidates %}
+    <div class="col-lg-6"><div class="candidate-card h-100">
+      <div class="d-flex justify-content-between gap-3 align-items-start"><div><h5 class="mb-1">{{c.full_name}}</h5><small class="muted">{{c.email}}</small></div><span class="match-pill">{{c.match_score}}% Match</span></div>
+      <div class="candidate-meta mt-3"><span><b>Domain:</b> {{c.domain or 'Not set'}}</span><span><b>Goal:</b> {{c.career_goal or 'Not set'}}</span><span><b>Assessment:</b> {{(c.score or 0)|round|int}}%</span></div>
+      <p class="muted small mt-3 mb-3"><b>Skills:</b> {{c.current_skills or 'Not provided'}}</p>
+      <a class="btn btn-outline-primary w-100" href="{{url_for('industry_candidate',uid=c.id)}}">View Candidate Profile <i class="bi bi-arrow-right ms-1"></i></a>
+    </div></div>
+  {% else %}<div class="col-12"><div class="empty">No student profiles are available yet.</div></div>{% endfor %}
+  </div>
+</div>{% endblock %}
